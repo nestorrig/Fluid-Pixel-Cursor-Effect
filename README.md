@@ -7,4 +7,4 @@ Incluye animaciones tipograficas, composicion visual responsive y un cursor de f
 
 - El efecto visual se renderiza en un `canvas` fullscreen con una simulacion 2D de velocidad, presion y densidad.
 - El cursor se suaviza con friccion y convierte su velocidad en fuerza/radio para inyectar fluido en tiempo real.
-- En elementos `.mask-p5`, el flujo cambia a un remolino continuo controlable con parametros via `Tweakpane`.
+- En elementos `.mask-item`, el flujo cambia a un remolino continuo controlable con parametros via `Tweakpane`.

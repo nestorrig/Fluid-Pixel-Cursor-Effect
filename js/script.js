@@ -5,7 +5,7 @@ window.addEventListener("load", () => {
 });
 
 function initPixelFluidCursor() {
-  const ACCENT = parseHexColor(
+  const initialAccentHex = normalizeHexColor(
     getComputedStyle(document.documentElement)
       .getPropertyValue("--accent-color")
       .trim() || "#004bff",
@@ -34,7 +34,7 @@ function initPixelFluidCursor() {
     FRAME_TRAVEL_SPEED: 90,
     FRAME_WRAP_IN_SPEED: 1.9,
     FRAME_WRAP_OUT_SPEED: 2.3,
-    FRAME_ENABLED: true,
+    FRAME_ENABLED: false,
     FRICTION: 0.22,
     COLOR_BASE_INTENSITY: 0.6,
     COLOR_SPEED_INTENSITY: 0.006,
@@ -42,9 +42,10 @@ function initPixelFluidCursor() {
     COLOR_G_MULT: 1,
     COLOR_B_MULT: 1,
     COLOR_FRAME_INTENSITY: 1.05,
-    COLOR_CLAMP: 1.6,
-    ALPHA_MULTIPLIER: 1.4,
+    COLOR_BASE_HEX: initialAccentHex,
   };
+  const RENDER_COLOR_CLAMP = 1.6;
+  const RENDER_ALPHA_MULTIPLIER = 1.4;
 
   const canvas = document.createElement("canvas");
   canvas.id = "fluid";
@@ -111,9 +112,170 @@ function initPixelFluidCursor() {
 
   const idx = (x, y) => x + y * simW;
   const clamp = (v, min, max) => Math.max(min, Math.min(max, v));
+  let accentColor = parseHexColor(config.COLOR_BASE_HEX);
+
+  const presetState = { MODE: "balanced" };
+  const PRESET_OPTIONS = {
+    "Balanced Flow": "balanced",
+    "Brushing Flow": "brushing",
+    "Fast cursor": "fast",
+    "Neon Pulse": "neon",
+    "Vortex Heavy": "vortex",
+    Custom: "custom",
+  };
+  const PRESETS = {
+    balanced: {
+      SIM_RESOLUTION: 150,
+      DYE_RESOLUTION: 220,
+      PIXEL_SIZE: 16,
+      VELOCITY_DISSIPATION: 0.77,
+      DENSITY_DISSIPATION: 0.95,
+      PRESSURE_ITERATIONS: 10,
+      SPLAT_FORCE: 18,
+      SPLAT_RADIUS: 2.1,
+      SPEED_RADIUS_GAIN: 0.045,
+      SPEED_FORCE_GAIN: 1.1,
+      FRAME_VORTEX_FORCE: 12,
+      FRAME_VORTEX_RADIUS: 0.5,
+      FRAME_VORTEX_DYE: 0.22,
+      FRAME_VORTEX_SAMPLES: 44,
+      FRAME_VORTEX_BAND: 60,
+      FRAME_VORTEX_PULL: 0.35,
+      FRAME_VORTEX_SPIN: 1.2,
+      FRICTION: 0.22,
+      COLOR_BASE_INTENSITY: 0.6,
+      COLOR_SPEED_INTENSITY: 0.006,
+      COLOR_R_MULT: 1,
+      COLOR_G_MULT: 1,
+      COLOR_B_MULT: 1,
+      COLOR_FRAME_INTENSITY: 1.05,
+      COLOR_BASE_HEX: initialAccentHex,
+    },
+    brushing: {
+      SIM_RESOLUTION: 250,
+      DYE_RESOLUTION: 200,
+      PIXEL_SIZE: 8,
+      VELOCITY_DISSIPATION: 0.8,
+      DENSITY_DISSIPATION: 0.99,
+      PRESSURE_ITERATIONS: 8,
+      SPLAT_FORCE: 6,
+      SPLAT_RADIUS: 7.0,
+      SPEED_RADIUS_GAIN: 0.06,
+      SPEED_FORCE_GAIN: 0.8,
+      FRAME_VORTEX_FORCE: 8,
+      FRAME_VORTEX_RADIUS: 0.8,
+      FRAME_VORTEX_DYE: 0.12,
+      FRAME_VORTEX_SAMPLES: 75,
+      FRAME_VORTEX_BAND: 40,
+      FRAME_VORTEX_PULL: 0.2,
+      FRAME_VORTEX_SPIN: 0.8,
+      FRICTION: 0.175,
+      COLOR_BASE_INTENSITY: 0.2,
+      COLOR_SPEED_INTENSITY: 0.001,
+      COLOR_R_MULT: 1,
+      COLOR_G_MULT: 1,
+      COLOR_B_MULT: 1,
+      COLOR_FRAME_INTENSITY: 0.9,
+      COLOR_BASE_HEX: initialAccentHex,
+    },
+    fast: {
+      SIM_RESOLUTION: 95,
+      DYE_RESOLUTION: 190,
+      PIXEL_SIZE: 12,
+      VELOCITY_DISSIPATION: 0.575,
+      DENSITY_DISSIPATION: 0.875,
+      PRESSURE_ITERATIONS: 8,
+      SPLAT_FORCE: 12,
+      SPLAT_RADIUS: 1.6,
+      SPEED_RADIUS_GAIN: 0.03,
+      SPEED_FORCE_GAIN: 0.8,
+      FRAME_VORTEX_FORCE: 8,
+      FRAME_VORTEX_RADIUS: 0.8,
+      FRAME_VORTEX_DYE: 0.12,
+      FRAME_VORTEX_SAMPLES: 28,
+      FRAME_VORTEX_BAND: 40,
+      FRAME_VORTEX_PULL: 0.2,
+      FRAME_VORTEX_SPIN: 0.8,
+      FRICTION: 0.3,
+      COLOR_BASE_INTENSITY: 0.45,
+      COLOR_SPEED_INTENSITY: 0.003,
+      COLOR_R_MULT: 1,
+      COLOR_G_MULT: 1,
+      COLOR_B_MULT: 1,
+      COLOR_FRAME_INTENSITY: 0.9,
+      COLOR_BASE_HEX: initialAccentHex,
+    },
+    neon: {
+      SIM_RESOLUTION: 180,
+      DYE_RESOLUTION: 260,
+      PIXEL_SIZE: 12,
+      VELOCITY_DISSIPATION: 0.88,
+      DENSITY_DISSIPATION: 0.97,
+      PRESSURE_ITERATIONS: 14,
+      SPLAT_FORCE: 28,
+      SPLAT_RADIUS: 2.8,
+      SPEED_RADIUS_GAIN: 0.08,
+      SPEED_FORCE_GAIN: 1.9,
+      FRAME_VORTEX_FORCE: 26,
+      FRAME_VORTEX_RADIUS: 1.6,
+      FRAME_VORTEX_DYE: 0.42,
+      FRAME_VORTEX_SAMPLES: 72,
+      FRAME_VORTEX_BAND: 48,
+      FRAME_VORTEX_PULL: 0.48,
+      FRAME_VORTEX_SPIN: 1.8,
+      FRICTION: 0.18,
+      COLOR_BASE_INTENSITY: 0.85,
+      COLOR_SPEED_INTENSITY: 0.012,
+      COLOR_R_MULT: 0.8,
+      COLOR_G_MULT: 0.95,
+      COLOR_B_MULT: 1.35,
+      COLOR_FRAME_INTENSITY: 1.35,
+      COLOR_BASE_HEX: "#3e7dff",
+    },
+    vortex: {
+      SIM_RESOLUTION: 200,
+      DYE_RESOLUTION: 240,
+      PIXEL_SIZE: 12,
+      VELOCITY_DISSIPATION: 0.93,
+      DENSITY_DISSIPATION: 0.95,
+      PRESSURE_ITERATIONS: 12,
+      SPLAT_FORCE: 88,
+      SPLAT_RADIUS: 0.6,
+      SPEED_RADIUS_GAIN: 0.3,
+      SPEED_FORCE_GAIN: 5.4,
+      FRAME_VORTEX_FORCE: 36,
+      FRAME_VORTEX_RADIUS: 2.5,
+      FRAME_VORTEX_DYE: 0.16,
+      FRAME_VORTEX_SAMPLES: 110,
+      FRAME_VORTEX_BAND: 70,
+      FRAME_VORTEX_PULL: 0.62,
+      FRAME_VORTEX_SPIN: 2.3,
+      FRICTION: 0.36,
+      COLOR_BASE_INTENSITY: 0.58,
+      COLOR_SPEED_INTENSITY: 0.005,
+      COLOR_R_MULT: 1,
+      COLOR_G_MULT: 1,
+      COLOR_B_MULT: 1.1,
+      COLOR_FRAME_INTENSITY: 1.2,
+      COLOR_BASE_HEX: initialAccentHex,
+    },
+  };
+
+  function normalizeHexColor(hex) {
+    const clean = hex.startsWith("#") ? hex.slice(1) : hex;
+    if (clean.length === 3) {
+      return `#${clean
+        .split("")
+        .map((ch) => ch + ch)
+        .join("")}`.toLowerCase();
+    }
+    if (clean.length === 6) return `#${clean}`.toLowerCase();
+    return "#004bff";
+  }
 
   function parseHexColor(hex) {
-    const clean = hex.startsWith("#") ? hex.slice(1) : hex;
+    const normalized = normalizeHexColor(hex);
+    const clean = normalized.slice(1);
     if (clean.length !== 6) return { r: 0, g: 75 / 255, b: 1 };
     const int = Number.parseInt(clean, 16);
     if (Number.isNaN(int)) return { r: 0, g: 75 / 255, b: 1 };
@@ -129,6 +291,25 @@ function initPixelFluidCursor() {
     heroQuotes.style.display = config.FRAME_ENABLED ? "" : "none";
   }
 
+  function refreshAccentColor() {
+    config.COLOR_BASE_HEX = normalizeHexColor(config.COLOR_BASE_HEX);
+    accentColor = parseHexColor(config.COLOR_BASE_HEX);
+  }
+
+  function setupMobileScrollLock() {
+    const isCoarsePointer = window.matchMedia(
+      "(hover: none) and (pointer: coarse)",
+    ).matches;
+    if (!isCoarsePointer) return;
+
+    document.documentElement.style.overflow = "hidden";
+    document.documentElement.style.overscrollBehavior = "none";
+    document.body.style.overflow = "hidden";
+    document.body.style.overscrollBehavior = "none";
+    document.body.style.touchAction = "none";
+    canvas.style.touchAction = "none";
+  }
+
   function setupPane() {
     const pane = new Pane({ title: "Pixel Fluid Cursor" });
     pane.element.style.position = "fixed";
@@ -138,7 +319,59 @@ function initPixelFluidCursor() {
     // pane.element.style.width = "320px";
     pane.element.style.pointerEvents = "auto";
 
-    const sim = pane.addFolder({ title: "Simulation" });
+    const presetsFolder = pane.addFolder({ title: "Presets" });
+    let sim;
+    let pointerFolder;
+    let frameFolder;
+    let colorFolder;
+    let clearButton;
+
+    const setManualControlsVisible = (isVisible) => {
+      if (sim) sim.hidden = !isVisible;
+      if (pointerFolder) pointerFolder.hidden = !isVisible;
+      if (frameFolder) frameFolder.hidden = !isVisible;
+      if (colorFolder) colorFolder.hidden = !isVisible;
+      if (clearButton) clearButton.hidden = !isVisible;
+    };
+
+    const applyPreset = (presetName) => {
+      if (presetName === "custom") {
+        setManualControlsVisible(true);
+        sim.expanded = true;
+        pointerFolder.expanded = false;
+        frameFolder.expanded = false;
+        colorFolder.expanded = false;
+        pane.refresh();
+        return;
+      }
+
+      const values = PRESETS[presetName];
+      if (!values) return;
+      Object.assign(config, values);
+      refreshAccentColor();
+      syncFrameVisibility();
+      resize();
+      setManualControlsVisible(false);
+      sim.expanded = true;
+      pointerFolder.expanded = false;
+      frameFolder.expanded = false;
+      colorFolder.expanded = false;
+      pane.refresh();
+    };
+
+    presetsFolder
+      .addBinding(presetState, "MODE", {
+        label: "Variant",
+        options: PRESET_OPTIONS,
+      })
+      .on("change", (event) => {
+        applyPreset(event.value);
+      });
+    presetsFolder
+      .addBinding(config, "FRAME_ENABLED", { label: "Mask Hover" })
+      .on("change", syncFrameVisibility);
+
+    sim = pane.addFolder({ title: "Simulation" });
     sim
       .addBinding(config, "SIM_RESOLUTION", {
         min: 72,
@@ -180,7 +413,7 @@ function initPixelFluidCursor() {
       label: "Pixel Size",
     });
 
-    const pointerFolder = pane.addFolder({ title: "Pointer Splat" });
+    pointerFolder = pane.addFolder({ title: "Pointer Splat" });
     pointerFolder.addBinding(config, "FRICTION", {
       min: 0.03,
       max: 0.4,
@@ -212,12 +445,7 @@ function initPixelFluidCursor() {
       label: "Speed Radius",
     });
 
-    const frameFolder = pane.addFolder({ title: "Mask Frame" });
-    frameFolder
-      .addBinding(config, "FRAME_ENABLED", {
-        label: "Enabled",
-      })
-      .on("change", syncFrameVisibility);
+    frameFolder = pane.addFolder({ title: "Mask Frame" });
     frameFolder.addBinding(config, "FRAME_VORTEX_FORCE", {
       min: 1,
       max: 120,
@@ -279,20 +507,13 @@ function initPixelFluidCursor() {
       label: "Travel",
     });
 
-    const renderFolder = pane.addFolder({ title: "Render" });
-    renderFolder.addBinding(config, "COLOR_CLAMP", {
-      min: 0.3,
-      max: 3,
-      step: 0.01,
-      label: "Color Clamp",
-    });
-    renderFolder.addBinding(config, "ALPHA_MULTIPLIER", {
-      min: 0.1,
-      max: 3,
-      step: 0.01,
-      label: "Alpha",
-    });
-    const colorFolder = pane.addFolder({ title: "Color" });
+    colorFolder = pane.addFolder({ title: "Color" });
+    colorFolder
+      .addBinding(config, "COLOR_BASE_HEX", {
+        // view: "color",
+        label: "Base Color",
+      })
+      .on("change", refreshAccentColor);
     colorFolder.addBinding(config, "COLOR_BASE_INTENSITY", {
       min: 0.1,
       max: 2,
@@ -330,9 +551,12 @@ function initPixelFluidCursor() {
       label: "Frame",
     });
 
-    pane
+    clearButton = pane
       .addButton({ title: "Clear Fluid" })
       .on("click", () => createFieldArrays());
+
+    setManualControlsVisible(false);
+    applyPreset(presetState.MODE);
   }
 
   function createFieldArrays() {
@@ -550,7 +774,7 @@ function initPixelFluidCursor() {
       config.COLOR_BASE_INTENSITY + speedBoost * config.COLOR_SPEED_INTENSITY;
 
     const isHoveringMask = Boolean(hoveredMaskRect);
-    const baseColor = isHoveringMask ? { r: 1, g: 1, b: 1 } : ACCENT;
+    const baseColor = isHoveringMask ? { r: 1, g: 1, b: 1 } : accentColor;
 
     addSplat(normX, normY, dx * force * dt, dy * force * dt, radius, {
       r: baseColor.r * intensity * config.COLOR_R_MULT,
@@ -707,7 +931,7 @@ function initPixelFluidCursor() {
 
   function updateHoveredMaskRect(x, y) {
     const hovered = document.elementFromPoint(x, y);
-    const maskNode = hovered ? hovered.closest(".mask-p5") : null;
+    const maskNode = hovered ? hovered.closest(".mask-item") : null;
 
     if (maskNode) {
       hoveredMaskRect = maskNode.getBoundingClientRect();
@@ -760,10 +984,10 @@ function initPixelFluidCursor() {
 
     for (let i = 0; i < cellCount; i++) {
       const o = i * 4;
-      const r = clamp(dyeR[i], 0, config.COLOR_CLAMP);
-      const g = clamp(dyeG[i], 0, config.COLOR_CLAMP);
-      const b = clamp(dyeB[i], 0, config.COLOR_CLAMP);
-      const alpha = clamp(Math.max(r, g, b) * config.ALPHA_MULTIPLIER, 0, 1);
+      const r = clamp(dyeR[i], 0, RENDER_COLOR_CLAMP);
+      const g = clamp(dyeG[i], 0, RENDER_COLOR_CLAMP);
+      const b = clamp(dyeB[i], 0, RENDER_COLOR_CLAMP);
+      const alpha = clamp(Math.max(r, g, b) * RENDER_ALPHA_MULTIPLIER, 0, 1);
 
       pixels[o] = Math.floor(r * 255);
       pixels[o + 1] = Math.floor(g * 255);
@@ -833,9 +1057,10 @@ function initPixelFluidCursor() {
     (event) => {
       if (!event.touches.length) return;
       const touch = event.touches[0];
+      event.preventDefault();
       onPointerMove(touch.clientX, touch.clientY);
     },
-    { passive: true },
+    { passive: false },
   );
 
   window.addEventListener("resize", resize);
@@ -844,6 +1069,7 @@ function initPixelFluidCursor() {
   }
 
   resize();
+  setupMobileScrollLock();
   setupPane();
   syncFrameVisibility();
   requestAnimationFrame(frame);

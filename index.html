@@ -4,7 +4,43 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Document</title>
+  <link rel="icon" type="image/png" href="./img/favicon-96x96.png" sizes="96x96" />
+  <link rel="icon" type="image/svg+xml" href="./img/favicon.svg" />
+  <link rel="shortcut icon" href="./img/favicon.ico" />
+  <link rel="apple-touch-icon" sizes="180x180" href="./img/apple-touch-icon.png" />
+  <meta name="apple-mobile-web-app-title" content="Fluid Pixel Cursor" />
+  <link rel="manifest" href="./img/site.webmanifest" />
+  <title>Fluid Pixel Cursor</title>
+
+  <!-- Primary Meta Tags -->
+  <meta name="title" content="Fluid Pixel Cursor" />
+  <meta name="description"
+    content="Interactive portfolio experiment with a fluid pixel cursor effect built with HTML, CSS, and JavaScript." />
+  <meta name="language" content="en" />
+  <meta name="robots" content="index, follow" />
+
+  <!-- Open Graph / Facebook -->
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="https://nestorrig.github.io/interactividad/" />
+  <meta property="og:title" content="Fluid Pixel Cursor" />
+  <meta property="og:description"
+    content="Interactive portfolio experiment with a fluid pixel cursor effect built with HTML, CSS, and JavaScript." />
+  <meta property="og:image" content="https://nestorrig.github.io/interactividad/img/cover.jpg" />
+  <meta property="og:image:width" content="1200" />
+  <meta property="og:image:height" content="630" />
+  <meta property="og:image:alt" content="Fluid Pixel Cursor cover image" />
+  <meta property="og:locale" content="en" />
+  <meta property="og:site_name" content="Fluid Pixel Cursor" />
+
+  <!-- Twitter -->
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:url" content="https://nestorrig.github.io/interactividad/" />
+  <meta name="twitter:title" content="Fluid Pixel Cursor" />
+  <meta name="twitter:description"
+    content="Interactive portfolio experiment with a fluid pixel cursor effect built with HTML, CSS, and JavaScript." />
+  <meta name="twitter:image" content="https://nestorrig.github.io/interactividad/img/cover.jpg" />
+  <meta name="twitter:image:alt" content="Fluid Pixel Cursor cover image" />
+
   <link rel="stylesheet" href="css/style.css">
   <link rel="stylesheet" href="css/fonts.css">
 </head>
@@ -13,58 +49,8 @@
   <main>
 
     <section class="hero__poster">
-      <!-- <div class="hero__picture mask-p5">
-        <svg class="hero__picture__svg" viewBox="0 0 800 800" fill="none" xmlns="http://www.w3.org/2000/svg"
-          preserveAspectRatio="xMidYMid slice">
-          <defs>
-            <mask id="gridMask" class="grid-mask" maskUnits="userSpaceOnUse" maskContentUnits="userSpaceOnUse" x="0"
-              y="0" width="800" height="800">
-              <rect width="800" height="800" fill="white" class="rect" />
-              <rect width="80" height="80" fill="black" />
-              <rect x="80" y="480" width="80" height="80" fill="black" />
-              <rect y="400" width="80" height="80" fill="black" />
-              <rect x="160" y="400" width="80" height="80" fill="black" />
-              <rect x="160" y="560" width="80" height="80" fill="black" />
-              <rect x="480" y="560" width="80" height="80" fill="black" />
-              <rect x="480" y="240" width="80" height="80" fill="black" />
-              <rect x="400" y="480" width="80" height="80" fill="black" />
-              <rect y="160" width="80" height="80" fill="black" />
-              <rect x="80" y="320" width="80" height="80" fill="black" />
-              <rect x="160" y="160" width="80" height="80" fill="black" />
-              <rect x="320" y="80" width="80" height="80" fill="black" />
-              <rect x="400" y="160" width="80" height="80" fill="black" />
-              <rect x="720" y="480" width="80" height="80" fill="black" />
-              <rect x="240" y="240" width="80" height="80" fill="black" />
-              <rect x="480" y="400" width="80" height="80" fill="black" />
-              <rect x="720" y="80" width="80" height="80" fill="black" />
-              <rect x="640" width="80" height="80" fill="black" />
-              <rect x="320" y="640" width="80" height="80" fill="black" />
-              <rect x="560" y="320" width="80" height="80" fill="black" />
-              <rect x="240" width="80" height="80" fill="black" />
-              <rect y="720" width="80" height="80" fill="black" />
-              <rect x="640" y="160" width="80" height="80" fill="black" />
-              <rect x="560" y="80" width="80" height="80" fill="black" />
-              <rect x="720" y="320" width="80" height="80" fill="black" />
-              <rect x="640" y="400" width="80" height="80" fill="black" />
-              <rect x="640" y="560" width="80" height="80" fill="black" />
-              <rect x="560" y="640" width="80" height="80" fill="black" />
-              <rect x="480" y="720" width="80" height="80" fill="black" />
-              <rect x="240" y="720" width="80" height="80" fill="black" />
-              <rect x="80" y="640" width="80" height="80" fill="black" />
-              <rect x="720" y="720" width="80" height="80" fill="black" />
-              <rect y="560" width="80" height="80" fill="black" />
-              <rect x="80" y="80" width="80" height="80" fill="black" />
-              <rect x="400" width="80" height="80" fill="black" />
-
-            </mask>
-          </defs>
-          <image href="./img/avatar.png" width="800" height="800" preserveAspectRatio="xMidYMid slice"
-            mask="url(#gridMask)" />
-        </svg>
-      </div> -->
-
-      <div class="hero__quotes">
-        <div class="hero__quotes__item mask-p5">
+      <div class="hero__quotes" style="display: none;">
+        <div class="hero__quotes__item mask-item">
           <p class="hero__quotes__item--text">
             <span class="is-span-word">
               <span>W</span>
@@ -107,7 +93,7 @@
           <div class="hero__quotes__item--border is-vertical is-left"></div>
           <div class="hero__quotes__item--border is-vertical is-right"></div>
         </div>
-        <div class="hero__quotes__item mask-p5">
+        <div class="hero__quotes__item mask-item">
           <p class="hero__quotes__item--text">
             An engineering enthusiast at heart, I strive to bridge the gap between
             <span class="is-span-word">
@@ -158,7 +144,7 @@
           <div class="hero__quotes__item--border is-vertical is-left"></div>
           <div class="hero__quotes__item--border is-vertical is-right"></div>
         </div>
-        <div class="hero__quotes__item mask-p5">
+        <div class="hero__quotes__item mask-item">
           <p class="hero__quotes__item--text">
             Audiovisual geek. I live at the intersection of
 
