@@ -2,7 +2,11 @@
 
 This document describes the solver in [`js/script.js`](js/script.js). The implementation is a CPU-side, stable-fluids style 2D grid running on the Canvas 2D API. There is no WebGL.
 
-The visual result is a pixelated dye trail driven by cursor and touch velocity.
+The visual result is a pixelated dye trail driven by cursor and touch velocity. Dark mode keeps the original additive look; light mode keeps the accent hue and fades through alpha so the trail does not sink into black on white.
+
+![Dark mode](img/cover/cover_fluid-pixel-cursor.png)
+
+![Light mode](img/cover/cover-light.png)
 
 ## Pipeline
 
@@ -95,9 +99,28 @@ Splats add divergence. `solvePressure` removes most of it so the flow looks inco
 
 `PRESSURE_ITERATIONS` is the quality/cost knob. The default (`10`) is a short, real-time solve, not a fully converged Poisson solution. Boundaries are skipped (`1 … size - 2`), which is enough for a decorative fullscreen field.
 
+## Color scheme
+
+Theme is `system`, `dark`, or `light`. System follows `prefers-color-scheme`. Manual picks set `data-theme` on `:root` and override the media query.
+
+CSS swaps background, text, grid, and `#fluid` blend mode:
+
+| Theme | Background | Text | Blend |
+| --- | --- | --- | --- |
+| Dark | `#000` | `#fff` | `screen` |
+| Light | `#fff` | `--accent-color` | `multiply` |
+
+Changing the Tweakpane hex writes back to `--accent-color`, so light-mode type stays matched to the dye.
+
 ## Pixel render
 
-`renderDye` walks every sim cell, clamps RGB to `1.6`, and derives alpha from `max(r, g, b) * 1.4`. That image is drawn into `dyeCanvas` at `simW × simH`.
+`renderDye` branches on the active theme.
+
+**Dark** uses the original mapping: RGB is clamped to `1.6` and written as-is. Alpha is `max(r, g, b) * 1.4`. Density and speed show up as brighter, near-white cores, and the trail can decay toward black. That reads as glow on a dark field.
+
+**Light** normalizes each cell to its hue, then puts fade only in alpha (`intensity * 1.85`). The trail stays the accent color instead of muddy gray. `#fluid` uses `multiply`, so the dye prints on white instead of washing out.
+
+The image is drawn into `dyeCanvas` at `simW × simH`.
 
 The pixel look is a two-step nearest-neighbor blit:
 
@@ -120,12 +143,13 @@ Dye is advected *after* projection, so color rides the cleaned velocity field, n
 
 ## Live controls
 
-[Tweakpane](https://tweakpane.github.io/docs/) binds the same `config` object the solver reads. Presets (`balanced`, `brushing`, `fast`, `neon`, `vortex`) overwrite that object and call `resize()`. `Custom` only reveals the manual folders; it does not change values by itself.
+[Tweakpane](https://tweakpane.github.io/docs/) binds the same `config` object the solver reads. The Theme control (`System`, `Dark`, `Light`) is always visible. Presets (`balanced`, `brushing`, `fast`, `neon`, `vortex`) overwrite simulation values and call `resize()`. `Custom` only reveals the manual folders; it does not change values by itself.
 
 `Clear Fluid` reallocates the field arrays, which zeroes velocity and dye.
 
 | Group | What it changes |
 | --- | --- |
+| Theme | System color scheme, or forced dark / light |
 | Simulation | Grid size, Jacobi iterations, dissipation, pixel block size |
 | Pointer Splat | Smoothing, base impulse, speed-to-force / speed-to-radius |
 | Color | Hex, base intensity, speed boost, RGB multipliers |

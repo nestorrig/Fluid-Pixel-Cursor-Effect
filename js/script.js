@@ -31,7 +31,10 @@ function initPixelFluidCursor() {
     COLOR_BASE_HEX: initialAccentHex,
   };
   const RENDER_COLOR_CLAMP = 1.6;
-  const RENDER_ALPHA_MULTIPLIER = 1.4;
+  const RENDER_ALPHA_DARK = 1.4;
+  const RENDER_ALPHA_LIGHT = 1.85;
+  const lightSchemeQuery = window.matchMedia("(prefers-color-scheme: light)");
+  let isLightScheme = lightSchemeQuery.matches;
 
   const canvas = document.createElement("canvas");
   canvas.id = "fluid";
@@ -89,6 +92,12 @@ function initPixelFluidCursor() {
   const clamp = (v, min, max) => Math.max(min, Math.min(max, v));
   let accentColor = parseHexColor(config.COLOR_BASE_HEX);
 
+  const themeState = { THEME: "system" };
+  const THEME_OPTIONS = {
+    System: "system",
+    Dark: "dark",
+    Light: "light",
+  };
   const presetState = { MODE: "balanced" };
   const PRESET_OPTIONS = {
     "Balanced Flow": "balanced",
@@ -224,6 +233,30 @@ function initPixelFluidCursor() {
   function refreshAccentColor() {
     config.COLOR_BASE_HEX = normalizeHexColor(config.COLOR_BASE_HEX);
     accentColor = parseHexColor(config.COLOR_BASE_HEX);
+    document.documentElement.style.setProperty(
+      "--accent-color",
+      config.COLOR_BASE_HEX,
+    );
+  }
+
+  function applyTheme(mode = themeState.THEME) {
+    themeState.THEME = mode;
+    const root = document.documentElement;
+
+    if (mode === "system") {
+      root.removeAttribute("data-theme");
+      isLightScheme = lightSchemeQuery.matches;
+      return;
+    }
+
+    root.setAttribute("data-theme", mode);
+    isLightScheme = mode === "light";
+  }
+
+  function syncColorScheme() {
+    if (themeState.THEME === "system") {
+      isLightScheme = lightSchemeQuery.matches;
+    }
   }
 
   function setupMobileScrollLock() {
@@ -285,6 +318,14 @@ function initPixelFluidCursor() {
       pane.refresh();
     };
 
+    presetsFolder
+      .addBinding(themeState, "THEME", {
+        label: "Theme",
+        options: THEME_OPTIONS,
+      })
+      .on("change", (event) => {
+        applyTheme(event.value);
+      });
     presetsFolder
       .addBinding(presetState, "MODE", {
         label: "Variant",
@@ -609,10 +650,31 @@ function initPixelFluidCursor() {
 
     for (let i = 0; i < cellCount; i++) {
       const o = i * 4;
-      const r = clamp(dyeR[i], 0, RENDER_COLOR_CLAMP);
-      const g = clamp(dyeG[i], 0, RENDER_COLOR_CLAMP);
-      const b = clamp(dyeB[i], 0, RENDER_COLOR_CLAMP);
-      const alpha = clamp(Math.max(r, g, b) * RENDER_ALPHA_MULTIPLIER, 0, 1);
+      let r;
+      let g;
+      let b;
+      let alpha;
+
+      if (isLightScheme) {
+        r = Math.max(0, dyeR[i]);
+        g = Math.max(0, dyeG[i]);
+        b = Math.max(0, dyeB[i]);
+        const intensity = Math.max(r, g, b);
+        const inv = intensity > 1e-6 ? 1 / intensity : 0;
+        alpha = clamp(
+          clamp(intensity, 0, RENDER_COLOR_CLAMP) * RENDER_ALPHA_LIGHT,
+          0,
+          1,
+        );
+        r *= inv;
+        g *= inv;
+        b *= inv;
+      } else {
+        r = clamp(dyeR[i], 0, RENDER_COLOR_CLAMP);
+        g = clamp(dyeG[i], 0, RENDER_COLOR_CLAMP);
+        b = clamp(dyeB[i], 0, RENDER_COLOR_CLAMP);
+        alpha = clamp(Math.max(r, g, b) * RENDER_ALPHA_DARK, 0, 1);
+      }
 
       pixels[o] = Math.floor(r * 255);
       pixels[o + 1] = Math.floor(g * 255);
@@ -692,6 +754,8 @@ function initPixelFluidCursor() {
 
   resize();
   setupMobileScrollLock();
+  applyTheme();
   setupPane();
+  lightSchemeQuery.addEventListener("change", syncColorScheme);
   requestAnimationFrame(frame);
 }
