@@ -98,7 +98,6 @@ body {
 }
 
 .footer {
-  visibility: hidden;
   pointer-events: auto;
   position: absolute;
   top: var(--space-md);
