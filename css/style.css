@@ -120,6 +120,15 @@ body {
   justify-content: center;
   gap: 2px;
   margin-bottom: var(--space-xs);
+
+  &:hover {
+    background-color: var(--background-color);
+    color: var(--color-text);
+
+    a {
+      color: var(--color-text);
+    }
+  }
 }
 
 .footer .social {
@@ -152,11 +161,21 @@ body {
 .footer .code a {
   width: var(--icon-code);
   height: var(--icon-code);
+
 }
 
 .socials-list a {
   width: var(--icon-social);
   height: var(--icon-social);
+
+  &:hover {
+    background-color: var(--background-color);
+    color: var(--color-text);
+
+    svg {
+      color: var(--color-text);
+    }
+  }
 }
 
 .footer a svg {
