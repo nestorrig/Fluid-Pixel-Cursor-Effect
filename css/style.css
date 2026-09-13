@@ -1,24 +1,21 @@
-@import url('fonts.css');
+@import url("fonts.css");
 
 :root {
-  --font-family: 'Geist', sans-serif;
-  --font-title: 'Geist', sans-serif;
-  --font-mono: 'GeistMono', monospace;
-  --font-pixel-circle: 'GeistPixel-Circle', monospace;
   --font-pixel-grid: 'GeistPixel-Grid', monospace;
-  --font-pixel-line: 'GeistPixel-Line', monospace;
-  --font-pixel-square: 'GeistPixel-Square', monospace;
-  --font-pixel-triangle: 'GeistPixel-Triangle', monospace;
   --accent-color: #004bff;
   --background-color: #000;
-  --color-text: #FFF;
+  --color-text: #fff;
+  --space-xs: clamp(4px, 5vw, 8px);
+  --space-sm: 16px;
+  --space-md: clamp(16px, 2vw, 32px);
+  --icon-code: clamp(48px, 5vw, 64px);
+  --icon-social: clamp(40px, 5vw, 48px);
 }
 
 * {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
-  /* outline: 1px solid red; */
 }
 
 html {
@@ -26,82 +23,16 @@ html {
 }
 
 body {
-  font-size: 0.96rem;
+  min-height: 100vh;
+  overflow-x: hidden;
+  color: var(--color-text);
+  font-family: var(--font-pixel-grid);
+  font-weight: 400;
+  font-synthesis: none;
   background-color: var(--background-color);
   background-image: url("data:image/svg+xml;utf8,<svg width='51' height='51' viewBox='0 0 51 51' fill='none' xmlns='http://www.w3.org/2000/svg'><line x1='4.18933' y1='0' x2='4.18933' y2='8.124' stroke='%23D9D9D9'/><line y1='3.93469' x2='8.1989' y2='3.93469' stroke='%23D9D9D9'/></svg>");
   background-size: 12px 12px;
-  background-position-x: 2%;
-  background-position-y: 0.5%;
-  color: var(--color-text);
-  font-family: var(--font-mono);
-  padding-inline: 2rem;
-  overflow-x: hidden;
-  min-height: 100vh;
-
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-}
-
-main {
-  width: 100%;
-  height: 100svh;
-  /* display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center; */
-}
-
-#fluid {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  z-index: -1;
-}
-
-strong {
-  font-family: var(--font-pixel-line);
-  font-weight: 100;
-  color: var(--accent-color);
-}
-
-h2,
-h3 {
-  font-size: 2rem;
-  margin-bottom: 2rem;
-}
-
-ol,
-ul {
-  list-style: none;
-  margin-bottom: 2rem;
-}
-
-a {
-  text-decoration: none;
-  color: var(--color-text);
-  text-decoration: underline;
-  transition: all 0.2s ease-out;
-}
-
-/* a:hover {
-  color: var(--accent-color);
-  background-color: var(--color-text);
-  animation: underline 0.2s ease-out;
-} */
-
-img {
-  width: 100%;
-  height: auto;
-  object-fit: cover;
-}
-
-span {
-  display: inline-block;
-  width: max-content;
+  background-position: 2% 0.5%;
 }
 
 *::selection {
@@ -109,196 +40,109 @@ span {
   background-color: var(--color-text);
 }
 
-section {
+#fluid {
+  position: fixed;
+  inset: 0;
+  width: 100%;
   height: 100%;
+  z-index: -1;
 }
 
+.main {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100svh;
+  z-index: 1;
+  pointer-events: none;
+}
 
-.hero__quotes {
-  height: 100%;
+.hero {
+  position: absolute;
+  top: 0;
+  left: var(--space-md);
+}
+
+.hero__title {
+  font-size: clamp(2.4rem, 8vw, 12rem);
+  font-weight: 400;
+  line-height: 1.25;
+}
+
+.footer {
+  position: absolute;
+  bottom: var(--space-md);
+  padding-inline: var(--space-md);
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: end;
+}
+
+.footer .code,
+.footer .social {
+  display: flex;
+  flex-direction: column;
+}
+
+.footer .code {
+  align-items: center;
+  gap: 2px;
+  margin-bottom: var(--space-xs);
+}
+
+.footer .social {
+  align-items: end;
+  gap: var(--space-sm);
+}
+
+.footer .code p {
+  font-size: clamp(0.8rem, 5vw, 1rem);
+}
+
+.footer .social p {
+  font-size: clamp(1rem, 5vw, 3rem);
+  padding-right: var(--space-xs);
+}
+
+.socials-list {
   display: flex;
   align-items: center;
-  flex-direction: column;
-  gap: 7rem;
-  justify-content: space-between;
-  padding-block: 5rem;
+  gap: var(--space-sm);
 }
 
-.hero__quotes__item {
-  position: relative;
-  padding: 2rem;
-  background-color: var(--accent-color);
-  width: 80%;
-  transition: all 0.2s ease;
-  /* animation: floating 10s linear infinite;
-  animation-delay: calc(2s * sibling-index()); */
+.footer a {
+  display: block;
+  padding: var(--space-xs);
+  color: var(--color-text);
+  text-decoration: none;
+  pointer-events: auto;
 }
 
-.hero__quotes__item--text {
-  transition: all 0.2s ease;
+.footer .code a {
+  width: var(--icon-code);
+  height: var(--icon-code);
 }
 
-.hero__quotes__item--text>.is-span-word {
-  display: inline-flex;
-  width: max-content;
+.socials-list a {
+  width: var(--icon-social);
+  height: var(--icon-social);
 }
 
-.hero__quotes__item--text>span {
-  display: inline-block;
-  width: 1ch;
-}
-
-.hero__quotes__item--text .is-space {
-  width: 1ch;
-}
-
-.hero__quotes__item--border {
-  position: absolute;
-  background-color: var(--color-text);
-  z-index: 1;
-  transition: all 0.2s ease;
-}
-
-.hero__quotes__item--border.is-horizontal {
-  height: 1px;
-  width: calc(100% + 1rem);
-  left: 50%;
-  transform: translateX(-50%);
-}
-
-.hero__quotes__item--border.is-vertical {
-  width: 1px;
-  height: calc(100% + 1rem);
-  top: 50%;
-  transform: translateY(-50%);
-}
-
-.hero__quotes__item--border.is-top {
-  top: 0;
-}
-
-.hero__quotes__item--border.is-bottom {
-  bottom: 0;
-}
-
-.hero__quotes__item--border.is-left {
-  left: 0;
-}
-
-.hero__quotes__item--border.is-right {
-  right: 0;
-
-}
-
-
-/* Tablet */
-@media (min-width: 768px) {
-
-
-
-  .hero__quotes {
-    position: absolute;
-    inset: 0;
-  }
-
-  .hero__quotes__item {
-    position: fixed;
-    max-width: 300px;
-    /* animation: floating 10s linear infinite; */
-    animation-delay: calc(2s * sibling-index());
-  }
-
-
-
-  .hero__quotes__item:nth-child(1) {
-    top: 10%;
-    right: 25%;
-  }
-
-  .hero__quotes__item:nth-child(2) {
-    top: 40%;
-    left: 10%;
-  }
-
-  .hero__quotes__item:nth-child(3) {
-    bottom: 15%;
-    right: 20%;
-  }
-
-
-
-}
-
-/* Desktop */
-@media (min-width: 1200px) {
-  .hero__quotes__item {
-    max-width: 400px;
-  }
-
-  .hero__quotes__item--text {
-    font-size: 1.8rem;
-  }
-
-
-}
-
-/* Hover */
-@media (hover: hover) and (pointer: fine) {
-  .hero__quotes__item:hover .hero__quotes__item--text {
-    scale: 0.9;
-  }
-
-  .hero__quotes__item:hover .hero__quotes__item--border.is-horizontal {
-    width: calc(100% - 4rem);
-  }
-
-  .hero__quotes__item:hover .hero__quotes__item--border.is-vertical {
-    height: calc(100% - 3rem);
-  }
-
-  .hero__quotes__item:hover .is-top {
-    translate: 0 1.5rem;
-  }
-
-  .hero__quotes__item:hover .is-bottom {
-    translate: 0 -1.5rem;
-  }
-
-  .hero__quotes__item:hover .is-left {
-    translate: 2rem 0;
-  }
-
-  .hero__quotes__item:hover .is-right {
-    translate: -2rem 0;
-  }
-
-  .hero__quotes__item:hover .is-span-word {
-    background-color: var(--color-text);
-    color: var(--accent-color);
-  }
-
-  .hero__quotes__item:hover .is-span-word>span {
-
-    animation: type-lette-opacity 0.15s linear forwards;
-    animation-delay: calc(0.1s + 0.02s * sibling-index());
-  }
-
-
-}
-
-/* no hover */
-@media (hover: none) and (pointer: coarse) {
-  .hero__quotes__item .is-span-word {
-    background-color: var(--color-text);
-    color: var(--accent-color);
-  }
+.footer a svg {
+  width: 100%;
+  height: 100%;
 }
 
 @media (max-width: 767px) {
+  .hero__title {
+    top: 4px;
+    max-width: 50%;
+  }
 
   html,
   body,
-  main {
+  .main {
     max-height: 100svh;
   }
 
@@ -309,107 +153,5 @@ section {
   canvas {
     max-height: 100svh;
     height: 100svh;
-  }
-}
-
-/* Animations */
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-  }
-
-  to {
-    opacity: 1;
-  }
-}
-
-
-
-@keyframes disappear-rect {
-
-  /* from {
-    fill: black;
-  }
-
-  to {
-    fill: white;
-  } */
-  0% {
-    fill: black;
-  }
-
-  33% {
-    fill: white;
-  }
-
-  66% {
-    fill: white;
-  }
-
-  100% {
-    fill: black;
-  }
-
-}
-
-@keyframes blink {
-  0% {
-    opacity: 0;
-  }
-
-  33% {
-    opacity: 1;
-  }
-
-  66% {
-    opacity: 1;
-  }
-
-  100% {
-    opacity: 0;
-  }
-}
-
-@keyframes underscore {
-
-  0% {
-    opacity: 1;
-  }
-
-  49% {
-    opacity: 1;
-  }
-
-  50% {
-    opacity: 0;
-  }
-
-  100% {
-    opacity: 0;
-  }
-}
-
-@keyframes type-lette-opacity {
-
-
-  0% {
-    /* width: 0ch; */
-    opacity: 0;
-  }
-
-  1% {
-    opacity: 1;
-  }
-
-  12% {
-    opacity: 1;
-  }
-
-  13% {
-    opacity: 0;
-  }
-
-  100% {
-    opacity: 1;
   }
 }

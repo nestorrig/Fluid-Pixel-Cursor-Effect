@@ -22,26 +22,12 @@ function initPixelFluidCursor() {
     SPLAT_RADIUS: 2.1,
     SPEED_RADIUS_GAIN: 0.045,
     SPEED_FORCE_GAIN: 1.1,
-    FRAME_VORTEX_FORCE: 12,
-    FRAME_VORTEX_RADIUS: 0.5,
-    FRAME_VORTEX_DYE: 0.22,
-    FRAME_VORTEX_SAMPLES: 44,
-    FRAME_VORTEX_BAND: 60,
-    FRAME_VORTEX_PULL: 0.35,
-    FRAME_VORTEX_SPIN: 1.2,
-    FRAME_PADDING_BASE: 12,
-    FRAME_PADDING_MAX: 36,
-    FRAME_TRAVEL_SPEED: 90,
-    FRAME_WRAP_IN_SPEED: 1.9,
-    FRAME_WRAP_OUT_SPEED: 2.3,
-    FRAME_ENABLED: false,
     FRICTION: 0.22,
     COLOR_BASE_INTENSITY: 0.6,
     COLOR_SPEED_INTENSITY: 0.006,
     COLOR_R_MULT: 1,
     COLOR_G_MULT: 1,
     COLOR_B_MULT: 1,
-    COLOR_FRAME_INTENSITY: 1.05,
     COLOR_BASE_HEX: initialAccentHex,
   };
   const RENDER_COLOR_CLAMP = 1.6;
@@ -70,8 +56,6 @@ function initPixelFluidCursor() {
   let simW = 0;
   let simH = 0;
   let cellCount = 0;
-  let hoveredMaskRect = null;
-  let elapsedTime = 0;
   let lastTime = 0;
   let dpr = 1;
   let viewportWidthCss = window.innerWidth;
@@ -90,15 +74,6 @@ function initPixelFluidCursor() {
   let dyeR0 = null;
   let dyeG0 = null;
   let dyeB0 = null;
-  const heroQuotes = document.querySelector(".hero__quotes");
-  const wrapState = {
-    element: null,
-    rect: null,
-    progress: 0,
-    anchor: 0,
-    direction: 1,
-  };
-
   const pointer = {
     targetX: window.innerWidth * 0.5,
     targetY: window.innerHeight * 0.5,
@@ -135,20 +110,12 @@ function initPixelFluidCursor() {
       SPLAT_RADIUS: 2.1,
       SPEED_RADIUS_GAIN: 0.045,
       SPEED_FORCE_GAIN: 1.1,
-      FRAME_VORTEX_FORCE: 12,
-      FRAME_VORTEX_RADIUS: 0.5,
-      FRAME_VORTEX_DYE: 0.22,
-      FRAME_VORTEX_SAMPLES: 44,
-      FRAME_VORTEX_BAND: 60,
-      FRAME_VORTEX_PULL: 0.35,
-      FRAME_VORTEX_SPIN: 1.2,
       FRICTION: 0.22,
       COLOR_BASE_INTENSITY: 0.6,
       COLOR_SPEED_INTENSITY: 0.006,
       COLOR_R_MULT: 1,
       COLOR_G_MULT: 1,
       COLOR_B_MULT: 1,
-      COLOR_FRAME_INTENSITY: 1.05,
       COLOR_BASE_HEX: initialAccentHex,
     },
     brushing: {
@@ -162,20 +129,12 @@ function initPixelFluidCursor() {
       SPLAT_RADIUS: 7.0,
       SPEED_RADIUS_GAIN: 0.06,
       SPEED_FORCE_GAIN: 0.8,
-      FRAME_VORTEX_FORCE: 8,
-      FRAME_VORTEX_RADIUS: 0.8,
-      FRAME_VORTEX_DYE: 0.12,
-      FRAME_VORTEX_SAMPLES: 75,
-      FRAME_VORTEX_BAND: 40,
-      FRAME_VORTEX_PULL: 0.2,
-      FRAME_VORTEX_SPIN: 0.8,
       FRICTION: 0.175,
       COLOR_BASE_INTENSITY: 0.2,
       COLOR_SPEED_INTENSITY: 0.001,
       COLOR_R_MULT: 1,
       COLOR_G_MULT: 1,
       COLOR_B_MULT: 1,
-      COLOR_FRAME_INTENSITY: 0.9,
       COLOR_BASE_HEX: initialAccentHex,
     },
     fast: {
@@ -189,20 +148,12 @@ function initPixelFluidCursor() {
       SPLAT_RADIUS: 1.6,
       SPEED_RADIUS_GAIN: 0.03,
       SPEED_FORCE_GAIN: 0.8,
-      FRAME_VORTEX_FORCE: 8,
-      FRAME_VORTEX_RADIUS: 0.8,
-      FRAME_VORTEX_DYE: 0.12,
-      FRAME_VORTEX_SAMPLES: 28,
-      FRAME_VORTEX_BAND: 40,
-      FRAME_VORTEX_PULL: 0.2,
-      FRAME_VORTEX_SPIN: 0.8,
       FRICTION: 0.3,
       COLOR_BASE_INTENSITY: 0.45,
       COLOR_SPEED_INTENSITY: 0.003,
       COLOR_R_MULT: 1,
       COLOR_G_MULT: 1,
       COLOR_B_MULT: 1,
-      COLOR_FRAME_INTENSITY: 0.9,
       COLOR_BASE_HEX: initialAccentHex,
     },
     neon: {
@@ -216,20 +167,12 @@ function initPixelFluidCursor() {
       SPLAT_RADIUS: 2.8,
       SPEED_RADIUS_GAIN: 0.08,
       SPEED_FORCE_GAIN: 1.9,
-      FRAME_VORTEX_FORCE: 26,
-      FRAME_VORTEX_RADIUS: 1.6,
-      FRAME_VORTEX_DYE: 0.42,
-      FRAME_VORTEX_SAMPLES: 72,
-      FRAME_VORTEX_BAND: 48,
-      FRAME_VORTEX_PULL: 0.48,
-      FRAME_VORTEX_SPIN: 1.8,
       FRICTION: 0.18,
       COLOR_BASE_INTENSITY: 0.85,
       COLOR_SPEED_INTENSITY: 0.012,
       COLOR_R_MULT: 0.8,
       COLOR_G_MULT: 0.95,
       COLOR_B_MULT: 1.35,
-      COLOR_FRAME_INTENSITY: 1.35,
       COLOR_BASE_HEX: "#3e7dff",
     },
     vortex: {
@@ -243,20 +186,12 @@ function initPixelFluidCursor() {
       SPLAT_RADIUS: 0.6,
       SPEED_RADIUS_GAIN: 0.3,
       SPEED_FORCE_GAIN: 5.4,
-      FRAME_VORTEX_FORCE: 36,
-      FRAME_VORTEX_RADIUS: 2.5,
-      FRAME_VORTEX_DYE: 0.16,
-      FRAME_VORTEX_SAMPLES: 110,
-      FRAME_VORTEX_BAND: 70,
-      FRAME_VORTEX_PULL: 0.62,
-      FRAME_VORTEX_SPIN: 2.3,
       FRICTION: 0.36,
       COLOR_BASE_INTENSITY: 0.58,
       COLOR_SPEED_INTENSITY: 0.005,
       COLOR_R_MULT: 1,
       COLOR_G_MULT: 1,
       COLOR_B_MULT: 1.1,
-      COLOR_FRAME_INTENSITY: 1.2,
       COLOR_BASE_HEX: initialAccentHex,
     },
   };
@@ -284,11 +219,6 @@ function initPixelFluidCursor() {
       g: ((int >> 8) & 255) / 255,
       b: (int & 255) / 255,
     };
-  }
-
-  function syncFrameVisibility() {
-    if (!heroQuotes) return;
-    heroQuotes.style.display = config.FRAME_ENABLED ? "" : "none";
   }
 
   function refreshAccentColor() {
@@ -322,14 +252,12 @@ function initPixelFluidCursor() {
     const presetsFolder = pane.addFolder({ title: "Presets" });
     let sim;
     let pointerFolder;
-    let frameFolder;
     let colorFolder;
     let clearButton;
 
     const setManualControlsVisible = (isVisible) => {
       if (sim) sim.hidden = !isVisible;
       if (pointerFolder) pointerFolder.hidden = !isVisible;
-      if (frameFolder) frameFolder.hidden = !isVisible;
       if (colorFolder) colorFolder.hidden = !isVisible;
       if (clearButton) clearButton.hidden = !isVisible;
     };
@@ -339,7 +267,6 @@ function initPixelFluidCursor() {
         setManualControlsVisible(true);
         sim.expanded = true;
         pointerFolder.expanded = false;
-        frameFolder.expanded = false;
         colorFolder.expanded = false;
         pane.refresh();
         return;
@@ -349,12 +276,10 @@ function initPixelFluidCursor() {
       if (!values) return;
       Object.assign(config, values);
       refreshAccentColor();
-      syncFrameVisibility();
       resize();
       setManualControlsVisible(false);
       sim.expanded = true;
       pointerFolder.expanded = false;
-      frameFolder.expanded = false;
       colorFolder.expanded = false;
       pane.refresh();
     };
@@ -367,9 +292,6 @@ function initPixelFluidCursor() {
       .on("change", (event) => {
         applyPreset(event.value);
       });
-    presetsFolder
-      .addBinding(config, "FRAME_ENABLED", { label: "Mask Hover" })
-      .on("change", syncFrameVisibility);
 
     sim = pane.addFolder({ title: "Simulation" });
     sim
@@ -445,68 +367,6 @@ function initPixelFluidCursor() {
       label: "Speed Radius",
     });
 
-    frameFolder = pane.addFolder({ title: "Mask Frame" });
-    frameFolder.addBinding(config, "FRAME_VORTEX_FORCE", {
-      min: 1,
-      max: 120,
-      step: 1,
-      label: "Vortex Force",
-    });
-    frameFolder.addBinding(config, "FRAME_VORTEX_RADIUS", {
-      min: 0.5,
-      max: 12,
-      step: 0.1,
-      label: "Vortex Radius",
-    });
-    frameFolder.addBinding(config, "FRAME_VORTEX_DYE", {
-      min: 0,
-      max: 1,
-      step: 0.01,
-      label: "Vortex Dye",
-    });
-    frameFolder.addBinding(config, "FRAME_VORTEX_SAMPLES", {
-      min: 8,
-      max: 180,
-      step: 1,
-      label: "Vortex Samples",
-    });
-    frameFolder.addBinding(config, "FRAME_VORTEX_BAND", {
-      min: 4,
-      max: 80,
-      step: 1,
-      label: "Vortex Band",
-    });
-    frameFolder.addBinding(config, "FRAME_VORTEX_PULL", {
-      min: -1,
-      max: 1,
-      step: 0.01,
-      label: "Vortex Pull",
-    });
-    frameFolder.addBinding(config, "FRAME_VORTEX_SPIN", {
-      min: 0,
-      max: 3,
-      step: 0.01,
-      label: "Vortex Spin",
-    });
-    frameFolder.addBinding(config, "FRAME_PADDING_BASE", {
-      min: 0,
-      max: 80,
-      step: 1,
-      label: "Pad Base",
-    });
-    frameFolder.addBinding(config, "FRAME_PADDING_MAX", {
-      min: 6,
-      max: 140,
-      step: 1,
-      label: "Pad Max",
-    });
-    frameFolder.addBinding(config, "FRAME_TRAVEL_SPEED", {
-      min: 10,
-      max: 280,
-      step: 1,
-      label: "Travel",
-    });
-
     colorFolder = pane.addFolder({ title: "Color" });
     colorFolder
       .addBinding(config, "COLOR_BASE_HEX", {
@@ -543,12 +403,6 @@ function initPixelFluidCursor() {
       max: 2,
       step: 0.01,
       label: "B Mult",
-    });
-    colorFolder.addBinding(config, "COLOR_FRAME_INTENSITY", {
-      min: 0,
-      max: 2,
-      step: 0.01,
-      label: "Frame",
     });
 
     clearButton = pane
@@ -650,41 +504,6 @@ function initPixelFluidCursor() {
     }
   }
 
-  function addFlowImpulse(
-    normX,
-    normY,
-    forceX,
-    forceY,
-    radiusCells,
-    color,
-    dyeAmount = 0,
-  ) {
-    const cx = Math.floor(normX * (simW - 1));
-    const cy = Math.floor(normY * (simH - 1));
-    const rad = Math.max(1.2, radiusCells);
-    const minX = clamp(Math.floor(cx - rad * 2), 0, simW - 1);
-    const maxX = clamp(Math.floor(cx + rad * 2), 0, simW - 1);
-    const minY = clamp(Math.floor(cy - rad * 2), 0, simH - 1);
-    const maxY = clamp(Math.floor(cy + rad * 2), 0, simH - 1);
-
-    for (let y = minY; y <= maxY; y++) {
-      for (let x = minX; x <= maxX; x++) {
-        const dx = x - cx;
-        const dy = y - cy;
-        const falloff = Math.exp(-(dx * dx + dy * dy) / (rad * rad));
-        const i = idx(x, y);
-
-        vx[i] += forceX * falloff;
-        vy[i] += forceY * falloff;
-        if (dyeAmount > 0) {
-          dyeR[i] += color.r * falloff * dyeAmount;
-          dyeG[i] += color.g * falloff * dyeAmount;
-          dyeB[i] += color.b * falloff * dyeAmount;
-        }
-      }
-    }
-  }
-
   function advectScalar(src, dst, dt, dissipation) {
     const dt0x = dt * (simW - 2);
     const dt0y = dt * (simH - 2);
@@ -773,209 +592,14 @@ function initPixelFluidCursor() {
     const intensity =
       config.COLOR_BASE_INTENSITY + speedBoost * config.COLOR_SPEED_INTENSITY;
 
-    const isHoveringMask = Boolean(hoveredMaskRect);
-    const baseColor = isHoveringMask ? { r: 1, g: 1, b: 1 } : accentColor;
-
     addSplat(normX, normY, dx * force * dt, dy * force * dt, radius, {
-      r: baseColor.r * intensity * config.COLOR_R_MULT,
-      g: baseColor.g * intensity * config.COLOR_G_MULT,
-      b: baseColor.b * intensity * config.COLOR_B_MULT,
+      r: accentColor.r * intensity * config.COLOR_R_MULT,
+      g: accentColor.g * intensity * config.COLOR_G_MULT,
+      b: accentColor.b * intensity * config.COLOR_B_MULT,
     });
 
     pointer.prevX = pointer.smoothX;
     pointer.prevY = pointer.smoothY;
-  }
-
-  function pointInPerimeter(t, left, top, right, bottom) {
-    const w = right - left;
-    const h = bottom - top;
-    const perimeter = w * 2 + h * 2;
-    const d = ((t % perimeter) + perimeter) % perimeter;
-
-    if (d <= w) return { x: left + d, y: top };
-    if (d <= w + h) return { x: right, y: top + (d - w) };
-    if (d <= w * 2 + h) return { x: right - (d - (w + h)), y: bottom };
-    return { x: left, y: bottom - (d - (w * 2 + h)) };
-  }
-
-  function distanceOnRectPerimeter(x, y, left, top, right, bottom) {
-    const w = right - left;
-    const h = bottom - top;
-    const perimeter = Math.max(1, w * 2 + h * 2);
-    const cx = clamp(x, left, right);
-    const cy = clamp(y, top, bottom);
-
-    const topDist = Math.abs(y - top);
-    const rightDist = Math.abs(x - right);
-    const bottomDist = Math.abs(y - bottom);
-    const leftDist = Math.abs(x - left);
-    const minDist = Math.min(topDist, rightDist, bottomDist, leftDist);
-
-    if (minDist === topDist) return clamp(cx - left, 0, perimeter);
-    if (minDist === rightDist) return clamp(w + (cy - top), 0, perimeter);
-    if (minDist === bottomDist)
-      return clamp(w + h + (right - cx), 0, perimeter);
-    return clamp(w + h + w + (bottom - cy), 0, perimeter);
-  }
-
-  function applyMaskVortex(dt) {
-    if (!config.FRAME_ENABLED) return;
-    if (!hoveredMaskRect && !wrapState.rect) return;
-
-    const isActiveHover = Boolean(hoveredMaskRect);
-    const baseRect = hoveredMaskRect || wrapState.rect;
-    if (!baseRect) return;
-
-    const nextProgress = isActiveHover
-      ? wrapState.progress + dt * config.FRAME_WRAP_IN_SPEED
-      : wrapState.progress - dt * config.FRAME_WRAP_OUT_SPEED;
-    wrapState.progress = clamp(nextProgress, 0, 1);
-    if (!isActiveHover && wrapState.progress <= 0.001) {
-      wrapState.rect = null;
-      wrapState.element = null;
-      return;
-    }
-
-    const pad = clamp(
-      config.FRAME_PADDING_BASE + pointer.speed * 0.45,
-      config.FRAME_PADDING_BASE,
-      config.FRAME_PADDING_MAX,
-    );
-    const left = baseRect.left - pad;
-    const top = baseRect.top - pad;
-    const right = baseRect.right + pad;
-    const bottom = baseRect.bottom + pad;
-    const perimeter = Math.max(1, (right - left) * 2 + (bottom - top) * 2);
-    const coveredLength = Math.max(
-      config.FRAME_VORTEX_SAMPLES,
-      perimeter * wrapState.progress,
-    );
-
-    const samples = Math.max(
-      3,
-      Math.floor(
-        config.FRAME_VORTEX_SAMPLES * (0.2 + wrapState.progress * 0.8),
-      ),
-    );
-    const forceBase =
-      config.FRAME_VORTEX_FORCE + clamp(pointer.speed * 0.5, 0, 24);
-    const band = config.FRAME_VORTEX_BAND * (0.3 + wrapState.progress * 0.7);
-
-    for (let i = 0; i < samples; i++) {
-      const ratio = i / Math.max(1, samples - 1);
-      const along = ratio * coveredLength;
-      const travel =
-        wrapState.anchor +
-        wrapState.direction * along +
-        elapsedTime *
-          config.FRAME_TRAVEL_SPEED *
-          config.FRAME_VORTEX_SPIN *
-          0.18;
-      const p = pointInPerimeter(travel, left, top, right, bottom);
-      const pAhead = pointInPerimeter(
-        travel + wrapState.direction * 14,
-        left,
-        top,
-        right,
-        bottom,
-      );
-      const dirX = pAhead.x - p.x;
-      const dirY = pAhead.y - p.y;
-      const dirLen = Math.max(0.0001, Math.hypot(dirX, dirY));
-      const nX = -dirY / dirLen;
-      const nY = dirX / dirLen;
-      const tX = dirX / dirLen;
-      const tY = dirY / dirLen;
-      const pulse = 0.6 + Math.sin(elapsedTime * 4 + i * 0.5) * 0.4;
-      const swirlForceX =
-        (tX + nX * config.FRAME_VORTEX_PULL) * forceBase * pulse * dt;
-      const swirlForceY =
-        (tY + nY * config.FRAME_VORTEX_PULL) * forceBase * pulse * dt;
-
-      const outerX = p.x + nX * band * 0.26;
-      const outerY = p.y + nY * band * 0.26;
-      const innerX = p.x - nX * band * 0.2;
-      const innerY = p.y - nY * band * 0.2;
-
-      addFlowImpulse(
-        clamp(p.x / viewportWidthCss, 0, 1),
-        clamp(p.y / viewportHeightCss, 0, 1),
-        swirlForceX,
-        swirlForceY,
-        config.FRAME_VORTEX_RADIUS,
-        { r: 1, g: 1, b: 1 },
-        config.FRAME_VORTEX_DYE,
-      );
-
-      addFlowImpulse(
-        clamp(outerX / viewportWidthCss, 0, 1),
-        clamp(outerY / viewportHeightCss, 0, 1),
-        swirlForceX + nX * forceBase * 0.2 * dt,
-        swirlForceY + nY * forceBase * 0.2 * dt,
-        config.FRAME_VORTEX_RADIUS * 0.9,
-        { r: 1, g: 1, b: 1 },
-        config.FRAME_VORTEX_DYE * 0.8,
-      );
-
-      addFlowImpulse(
-        clamp(innerX / viewportWidthCss, 0, 1),
-        clamp(innerY / viewportHeightCss, 0, 1),
-        swirlForceX - nX * forceBase * 0.16 * dt,
-        swirlForceY - nY * forceBase * 0.16 * dt,
-        config.FRAME_VORTEX_RADIUS * 0.75,
-        { r: 1, g: 1, b: 1 },
-        config.FRAME_VORTEX_DYE * 0.7,
-      );
-    }
-  }
-
-  function updateHoveredMaskRect(x, y) {
-    const hovered = document.elementFromPoint(x, y);
-    const maskNode = hovered ? hovered.closest(".mask-item") : null;
-
-    if (maskNode) {
-      hoveredMaskRect = maskNode.getBoundingClientRect();
-
-      if (wrapState.element !== maskNode) {
-        wrapState.element = maskNode;
-        wrapState.rect = hoveredMaskRect;
-        wrapState.progress = 0;
-
-        const entryPad = config.FRAME_PADDING_BASE;
-        wrapState.anchor = distanceOnRectPerimeter(
-          x,
-          y,
-          hoveredMaskRect.left - entryPad,
-          hoveredMaskRect.top - entryPad,
-          hoveredMaskRect.right + entryPad,
-          hoveredMaskRect.bottom + entryPad,
-        );
-
-        const vxEntry = pointer.targetX - pointer.prevX;
-        const vyEntry = pointer.targetY - pointer.prevY;
-        wrapState.direction = vxEntry + vyEntry >= 0 ? 1 : -1;
-      } else {
-        wrapState.rect = hoveredMaskRect;
-      }
-      return;
-    }
-
-    if (hoveredMaskRect && wrapState.rect) {
-      const exitPad = config.FRAME_PADDING_BASE;
-      wrapState.anchor = distanceOnRectPerimeter(
-        x,
-        y,
-        wrapState.rect.left - exitPad,
-        wrapState.rect.top - exitPad,
-        wrapState.rect.right + exitPad,
-        wrapState.rect.bottom + exitPad,
-      );
-      const vxExit = pointer.targetX - pointer.prevX;
-      const vyExit = pointer.targetY - pointer.prevY;
-      wrapState.direction = vxExit + vyExit >= 0 ? 1 : -1;
-    }
-
-    hoveredMaskRect = null;
   }
 
   function renderDye() {
@@ -1021,11 +645,9 @@ function initPixelFluidCursor() {
     if (lastTime === 0) lastTime = now;
     const dt = clamp((now - lastTime) * 0.001, 0.001, 0.018);
     lastTime = now;
-    elapsedTime += dt;
 
     if (pointer.ready) {
       updatePointerFluid(dt);
-      applyMaskVortex(dt);
     }
 
     advectVelocity(dt);
@@ -1045,7 +667,6 @@ function initPixelFluidCursor() {
     pointer.targetX = clientX;
     pointer.targetY = clientY;
     pointer.ready = true;
-    updateHoveredMaskRect(clientX, clientY);
   }
 
   window.addEventListener("mousemove", (event) => {
@@ -1071,6 +692,5 @@ function initPixelFluidCursor() {
   resize();
   setupMobileScrollLock();
   setupPane();
-  syncFrameVisibility();
   requestAnimationFrame(frame);
 }
