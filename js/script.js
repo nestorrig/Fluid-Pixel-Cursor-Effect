@@ -86,7 +86,10 @@ function initPixelFluidCursor() {
     prevY: window.innerHeight * 0.5,
     speed: 0,
     ready: false,
+    lastInputAt: 0,
   };
+  const POINTER_IDLE_MS = 80;
+  const POINTER_SPLAT_SPEED = 0.04;
 
   const idx = (x, y) => x + y * simW;
   const clamp = (v, min, max) => Math.max(min, Math.min(max, v));
@@ -633,12 +636,15 @@ function initPixelFluidCursor() {
     const force = config.SPLAT_FORCE + speedBoost * config.SPEED_FORCE_GAIN;
     const intensity =
       config.COLOR_BASE_INTENSITY + speedBoost * config.COLOR_SPEED_INTENSITY;
+    const hasInput = performance.now() - pointer.lastInputAt < POINTER_IDLE_MS;
 
-    addSplat(normX, normY, dx * force * dt, dy * force * dt, radius, {
-      r: accentColor.r * intensity * config.COLOR_R_MULT,
-      g: accentColor.g * intensity * config.COLOR_G_MULT,
-      b: accentColor.b * intensity * config.COLOR_B_MULT,
-    });
+    if (hasInput && pointer.speed > POINTER_SPLAT_SPEED) {
+      addSplat(normX, normY, dx * force * dt, dy * force * dt, radius, {
+        r: accentColor.r * intensity * config.COLOR_R_MULT,
+        g: accentColor.g * intensity * config.COLOR_G_MULT,
+        b: accentColor.b * intensity * config.COLOR_B_MULT,
+      });
+    }
 
     pointer.prevX = pointer.smoothX;
     pointer.prevY = pointer.smoothY;
@@ -730,6 +736,7 @@ function initPixelFluidCursor() {
     pointer.targetX = clientX;
     pointer.targetY = clientY;
     pointer.ready = true;
+    pointer.lastInputAt = performance.now();
   }
 
   window.addEventListener("mousemove", (event) => {
@@ -746,6 +753,13 @@ function initPixelFluidCursor() {
     },
     { passive: false },
   );
+
+  window.addEventListener("touchend", () => {
+    pointer.lastInputAt = 0;
+  });
+  window.addEventListener("touchcancel", () => {
+    pointer.lastInputAt = 0;
+  });
 
   window.addEventListener("resize", resize);
   if (window.visualViewport) {
