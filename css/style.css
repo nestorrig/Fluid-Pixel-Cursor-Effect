@@ -8,8 +8,8 @@
   --space-xs: clamp(4px, 5vw, 8px);
   --space-sm: 16px;
   --space-md: clamp(16px, 2vw, 32px);
-  --icon-code: clamp(48px, 5vw, 64px);
-  --icon-social: clamp(40px, 5vw, 48px);
+  --icon-code: clamp(40px, 5vw, 64px);
+  --icon-social: clamp(36px, 5vw, 48px);
 }
 
 * {
@@ -59,24 +59,26 @@ body {
 
 .hero {
   position: absolute;
-  top: 0;
+  bottom: var(--space-md);
   left: var(--space-md);
 }
 
 .hero__title {
-  font-size: clamp(2.4rem, 8vw, 12rem);
+  pointer-events: auto;
+  font-size: clamp(3rem, 11vw, 16rem);
   font-weight: 400;
-  line-height: 1.25;
+  line-height: 1;
 }
 
 .footer {
+  pointer-events: auto;
   position: absolute;
-  bottom: var(--space-md);
+  top: var(--space-md);
   padding-inline: var(--space-md);
-  width: 100%;
   display: flex;
   justify-content: space-between;
   align-items: end;
+  gap: 36px;
 }
 
 .footer .code,
@@ -86,22 +88,23 @@ body {
 }
 
 .footer .code {
+  width: fit-content;
   align-items: center;
+  justify-content: center;
   gap: 2px;
   margin-bottom: var(--space-xs);
 }
 
 .footer .social {
-  align-items: end;
   gap: var(--space-sm);
 }
 
 .footer .code p {
-  font-size: clamp(0.8rem, 5vw, 1rem);
+  font-size: clamp(0.9rem, 2vw, 1rem);
 }
 
 .footer .social p {
-  font-size: clamp(1rem, 5vw, 3rem);
+  font-size: clamp(1.6rem, 4vw, 2.4rem);
   padding-right: var(--space-xs);
 }
 
@@ -135,10 +138,25 @@ body {
 }
 
 @media (max-width: 767px) {
-  .hero {
-    top: 8px;
-    max-width: 40%;
+  .hero__title {
+    font-size: clamp(3.8rem, 8vw, 12rem);
   }
+
+  .footer {
+    width: 100%;
+    gap: 0px;
+    align-items: end;
+    justify-content: space-between;
+  }
+
+  .footer .social {
+    gap: 24px;
+  }
+
+  .footer .social p {
+    max-width: 150px;
+  }
+
 
   html,
   body,

@@ -242,6 +242,7 @@ function initPixelFluidCursor() {
 
   function setupPane() {
     const pane = new Pane({ title: "Fluid Pixel Cursor" });
+    pane.expanded = false;
     pane.element.style.position = "fixed";
     pane.element.style.top = "12px";
     pane.element.style.right = "12px";
