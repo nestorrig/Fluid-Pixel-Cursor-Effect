@@ -135,9 +135,9 @@ body {
 }
 
 @media (max-width: 767px) {
-  .hero__title {
-    top: 4px;
-    max-width: 50%;
+  .hero {
+    top: 8px;
+    max-width: 40%;
   }
 
   html,
