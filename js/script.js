@@ -242,6 +242,20 @@ function initPixelFluidCursor() {
     );
   }
 
+  function getAccentChannels() {
+    return {
+      r: accentColor.r * config.COLOR_R_MULT,
+      g: accentColor.g * config.COLOR_G_MULT,
+      b: accentColor.b * config.COLOR_B_MULT,
+    };
+  }
+
+  function isDarkInkColor() {
+    const { r, g, b } = getAccentChannels();
+
+    return Math.max(r, g, b) < 1;
+  }
+
   function applyTheme(mode = themeState.THEME) {
     themeState.THEME = mode;
     const root = document.documentElement;
@@ -639,10 +653,16 @@ function initPixelFluidCursor() {
     const hasInput = performance.now() - pointer.lastInputAt < POINTER_IDLE_MS;
 
     if (hasInput && pointer.speed > POINTER_SPLAT_SPEED) {
+      const channels = getAccentChannels();
+      const useInk = isLightScheme && isDarkInkColor();
+      const ink =
+        intensity *
+        Math.max(1 - Math.max(channels.r, channels.g, channels.b), 0.55);
+
       addSplat(normX, normY, dx * force * dt, dy * force * dt, radius, {
-        r: accentColor.r * intensity * config.COLOR_R_MULT,
-        g: accentColor.g * intensity * config.COLOR_G_MULT,
-        b: accentColor.b * intensity * config.COLOR_B_MULT,
+        r: useInk ? ink : channels.r * intensity,
+        g: useInk ? ink : channels.g * intensity,
+        b: useInk ? ink : channels.b * intensity,
       });
     }
 
@@ -653,6 +673,8 @@ function initPixelFluidCursor() {
   function renderDye() {
     const imageData = dyeCtx.createImageData(simW, simH);
     const pixels = imageData.data;
+    const darkInk = isLightScheme && isDarkInkColor();
+    const inkColor = darkInk ? getAccentChannels() : null;
 
     for (let i = 0; i < cellCount; i++) {
       const o = i * 4;
@@ -661,7 +683,17 @@ function initPixelFluidCursor() {
       let b;
       let alpha;
 
-      if (isLightScheme) {
+      if (darkInk) {
+        const ink = Math.max(0, dyeR[i], dyeG[i], dyeB[i]);
+        r = clamp(inkColor.r, 0, 1);
+        g = clamp(inkColor.g, 0, 1);
+        b = clamp(inkColor.b, 0, 1);
+        alpha = clamp(
+          clamp(ink, 0, RENDER_COLOR_CLAMP) * RENDER_ALPHA_LIGHT,
+          0,
+          1,
+        );
+      } else if (isLightScheme) {
         r = Math.max(0, dyeR[i]);
         g = Math.max(0, dyeG[i]);
         b = Math.max(0, dyeB[i]);

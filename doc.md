@@ -103,12 +103,12 @@ Splats add divergence. `solvePressure` removes most of it so the flow looks inco
 
 Theme is `system`, `dark`, or `light`. System follows `prefers-color-scheme`. Manual picks set `data-theme` on `:root` and override the media query.
 
-CSS swaps background, text, grid, and `#fluid` blend mode:
+CSS swaps background, text, and grid. The canvas composites with its own alpha; there is no `mix-blend-mode`.
 
-| Theme | Background | Text | Blend |
-| --- | --- | --- | --- |
-| Dark | `#000` | `#fff` | `screen` |
-| Light | `#fff` | `--accent-color` | `multiply` |
+| Theme | Background | Text |
+| --- | --- | --- |
+| Dark | `#000` | `#fff` |
+| Light | `#fff` | `--accent-color` |
 
 Changing the Tweakpane hex writes back to `--accent-color`, so light-mode type stays matched to the dye.
 
@@ -118,7 +118,7 @@ Changing the Tweakpane hex writes back to `--accent-color`, so light-mode type s
 
 **Dark** uses the original mapping: RGB is clamped to `1.6` and written as-is. Alpha is `max(r, g, b) * 1.4`. Density and speed show up as brighter, near-white cores, and the trail can decay toward black. That reads as glow on a dark field.
 
-**Light** normalizes each cell to its hue, then puts fade only in alpha (`intensity * 1.85`). The trail stays the accent color instead of muddy gray. `#fluid` uses `multiply`, so the dye prints on white instead of washing out.
+**Light** normalizes each cell to its hue, then puts fade only in alpha (`intensity * 1.85`). The trail stays the accent color instead of muddy gray. Dark accents splat ink density and paint the real color so they stay visible on white.
 
 The image is drawn into `dyeCanvas` at `simW × simH`.
 
