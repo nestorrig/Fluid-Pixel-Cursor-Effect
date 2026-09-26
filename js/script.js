@@ -29,8 +29,13 @@ function initPixelFluidCursor() {
     COLOR_G_MULT: 1,
     COLOR_B_MULT: 1,
     COLOR_BASE_HEX: initialAccentHex,
+    DYE_CLAMP: 1.6,
+    ASCII_RAMP: " .:-=+*#%@",
   };
-  const RENDER_COLOR_CLAMP = 1.6;
+  const renderMode = document.body.dataset.fluidRender || "pixel";
+  const isAsciiRender = renderMode === "ascii";
+  const isSvgRender = renderMode === "svg";
+  if (isSvgRender) config.PIXEL_SIZE = 12;
   const RENDER_ALPHA_DARK = 1.4;
   const RENDER_ALPHA_LIGHT = 1.85;
   const lightSchemeQuery = window.matchMedia("(prefers-color-scheme: light)");
@@ -90,6 +95,13 @@ function initPixelFluidCursor() {
   };
   const POINTER_IDLE_MS = 80;
   const POINTER_SPLAT_SPEED = 0.04;
+  const dyeDebug = {
+    min: 0,
+    max: 0,
+    mean: 0,
+    t: 0,
+    glyph: " ",
+  };
 
   const idx = (x, y) => x + y * simW;
   const clamp = (v, min, max) => Math.max(min, Math.min(max, v));
@@ -291,7 +303,13 @@ function initPixelFluidCursor() {
   }
 
   function setupPane() {
-    const pane = new Pane({ title: "Fluid Pixel Cursor" });
+    const pane = new Pane({
+      title: isSvgRender
+        ? "Fluid SVG Cursor"
+        : isAsciiRender
+          ? "Fluid ASCII Cursor"
+          : "Fluid Pixel Cursor",
+    });
     pane.expanded = false;
     pane.element.style.position = "fixed";
     pane.element.style.top = "12px";
@@ -325,9 +343,14 @@ function initPixelFluidCursor() {
 
       const values = PRESETS[presetName];
       if (!values) return;
+      const asciiRamp = config.ASCII_RAMP;
+      const dyeClamp = config.DYE_CLAMP;
       Object.assign(config, values);
+      config.ASCII_RAMP = asciiRamp;
+      config.DYE_CLAMP = dyeClamp;
       refreshAccentColor();
       resize();
+      syncGridBackground();
       setManualControlsVisible(false);
       sim.expanded = true;
       pointerFolder.expanded = false;
@@ -351,6 +374,31 @@ function initPixelFluidCursor() {
       .on("change", (event) => {
         applyPreset(event.value);
       });
+
+    const dyeFolder = pane.addFolder({ title: "Dye Range" });
+    const dyeMonitor = { readonly: true, interval: 80 };
+    dyeFolder.addBinding(config, "DYE_CLAMP", {
+      min: 0.2,
+      max: 6,
+      step: 0.05,
+      label: "Clamp",
+    });
+    if (isAsciiRender) {
+      dyeFolder.addBinding(config, "ASCII_RAMP", { label: "ASCII Ramp" });
+    }
+    dyeFolder.addBinding(dyeDebug, "min", { ...dyeMonitor, label: "Min" });
+    dyeFolder.addBinding(dyeDebug, "max", { ...dyeMonitor, label: "Max" });
+    dyeFolder.addBinding(dyeDebug, "mean", { ...dyeMonitor, label: "Mean" });
+    dyeFolder.addBinding(dyeDebug, "t", {
+      ...dyeMonitor,
+      label: "t (max/clamp)",
+    });
+    if (isAsciiRender) {
+      dyeFolder.addBinding(dyeDebug, "glyph", {
+        ...dyeMonitor,
+        label: "Peak Glyph",
+      });
+    }
 
     sim = pane.addFolder({ title: "Simulation" });
     sim
@@ -391,8 +439,12 @@ function initPixelFluidCursor() {
       min: 1,
       max: 100,
       step: 1,
-      label: "Pixel Size",
-    });
+      label: isSvgRender
+        ? "Tile Size"
+        : isAsciiRender
+          ? "Glyph Size"
+          : "Pixel Size",
+    }).on("change", syncGridBackground);
 
     pointerFolder = pane.addFolder({ title: "Pointer Splat" });
     pointerFolder.addBinding(config, "FRICTION", {
@@ -670,50 +722,80 @@ function initPixelFluidCursor() {
     pointer.prevY = pointer.smoothY;
   }
 
-  function renderDye() {
+  function sampleCellColor(i) {
+    const darkInk = isLightScheme && isDarkInkColor();
+    const intensity = Math.max(0, dyeR[i], dyeG[i], dyeB[i]);
+    let r;
+    let g;
+    let b;
+    let alpha;
+
+    if (darkInk) {
+      const inkColor = getAccentChannels();
+      r = clamp(inkColor.r, 0, 1);
+      g = clamp(inkColor.g, 0, 1);
+      b = clamp(inkColor.b, 0, 1);
+      alpha = clamp(
+        clamp(intensity, 0, config.DYE_CLAMP) * RENDER_ALPHA_LIGHT,
+        0,
+        1,
+      );
+    } else if (isLightScheme) {
+      r = Math.max(0, dyeR[i]);
+      g = Math.max(0, dyeG[i]);
+      b = Math.max(0, dyeB[i]);
+      const inv = intensity > 1e-6 ? 1 / intensity : 0;
+      alpha = clamp(
+        clamp(intensity, 0, config.DYE_CLAMP) * RENDER_ALPHA_LIGHT,
+        0,
+        1,
+      );
+      r *= inv;
+      g *= inv;
+      b *= inv;
+    } else {
+      r = clamp(dyeR[i], 0, config.DYE_CLAMP);
+      g = clamp(dyeG[i], 0, config.DYE_CLAMP);
+      b = clamp(dyeB[i], 0, config.DYE_CLAMP);
+      alpha = clamp(intensity * RENDER_ALPHA_DARK, 0, 1);
+    }
+
+    return { r, g, b, alpha, intensity };
+  }
+
+  function updateDyeDebug() {
+    if (!dyeR || cellCount === 0) return;
+
+    let min = Infinity;
+    let max = 0;
+    let sum = 0;
+
+    for (let i = 0; i < cellCount; i++) {
+      const value = Math.max(0, dyeR[i], dyeG[i], dyeB[i]);
+      if (value < min) min = value;
+      if (value > max) max = value;
+      sum += value;
+    }
+
+    dyeDebug.min = min === Infinity ? 0 : min;
+    dyeDebug.max = max;
+    dyeDebug.mean = sum / cellCount;
+    dyeDebug.t = clamp(max / config.DYE_CLAMP, 0, 1);
+
+    const ramp =
+      config.ASCII_RAMP.length > 0 ? config.ASCII_RAMP : " .:-=+*#%@";
+    const rampMax = Math.max(0, ramp.length - 1);
+    dyeDebug.glyph =
+      ramp[Math.min(rampMax, Math.floor(dyeDebug.t * rampMax))] || " ";
+  }
+
+  function renderPixelDye() {
     const imageData = dyeCtx.createImageData(simW, simH);
     const pixels = imageData.data;
-    const darkInk = isLightScheme && isDarkInkColor();
-    const inkColor = darkInk ? getAccentChannels() : null;
 
     for (let i = 0; i < cellCount; i++) {
       const o = i * 4;
-      let r;
-      let g;
-      let b;
-      let alpha;
-
-      if (darkInk) {
-        const ink = Math.max(0, dyeR[i], dyeG[i], dyeB[i]);
-        r = clamp(inkColor.r, 0, 1);
-        g = clamp(inkColor.g, 0, 1);
-        b = clamp(inkColor.b, 0, 1);
-        alpha = clamp(
-          clamp(ink, 0, RENDER_COLOR_CLAMP) * RENDER_ALPHA_LIGHT,
-          0,
-          1,
-        );
-      } else if (isLightScheme) {
-        r = Math.max(0, dyeR[i]);
-        g = Math.max(0, dyeG[i]);
-        b = Math.max(0, dyeB[i]);
-        const intensity = Math.max(r, g, b);
-        const inv = intensity > 1e-6 ? 1 / intensity : 0;
-        alpha = clamp(
-          clamp(intensity, 0, RENDER_COLOR_CLAMP) * RENDER_ALPHA_LIGHT,
-          0,
-          1,
-        );
-        r *= inv;
-        g *= inv;
-        b *= inv;
-      } else {
-        r = clamp(dyeR[i], 0, RENDER_COLOR_CLAMP);
-        g = clamp(dyeG[i], 0, RENDER_COLOR_CLAMP);
-        b = clamp(dyeB[i], 0, RENDER_COLOR_CLAMP);
-        alpha = clamp(Math.max(r, g, b) * RENDER_ALPHA_DARK, 0, 1);
-      }
-
+      const { r, g, b, alpha } = sampleCellColor(i);
       pixels[o] = Math.floor(r * 255);
       pixels[o + 1] = Math.floor(g * 255);
       pixels[o + 2] = Math.floor(b * 255);
@@ -742,6 +824,116 @@ function initPixelFluidCursor() {
     ctx.drawImage(pixelCanvas, 0, 0, width, height);
   }
 
+  function renderAsciiDye() {
+    const cell = Math.max(8, Math.floor(config.PIXEL_SIZE * dpr));
+    const cols = Math.max(1, Math.floor(width / cell));
+    const rows = Math.max(1, Math.floor(height / cell));
+    const ramp =
+      config.ASCII_RAMP.length > 0 ? config.ASCII_RAMP : " .:-=+*#%@";
+    const rampMax = ramp.length - 1;
+
+    ctx.clearRect(0, 0, width, height);
+    ctx.font = `${Math.floor(cell * 0.92)}px GeistPixel-Grid, ui-monospace, monospace`;
+    ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
+
+    for (let row = 0; row < rows; row++) {
+      for (let col = 0; col < cols; col++) {
+        const sx = Math.floor(((col + 0.5) / cols) * (simW - 1));
+        const sy = Math.floor(((row + 0.5) / rows) * (simH - 1));
+        const { r, g, b, alpha, intensity } = sampleCellColor(idx(sx, sy));
+        if (alpha < 0.05) continue;
+
+        const t = clamp(intensity / config.DYE_CLAMP, 0, 1);
+        const glyph = ramp[Math.min(rampMax, Math.floor(t * rampMax))];
+        if (glyph === " ") continue;
+
+        ctx.fillStyle = `rgba(${Math.floor(r * 255)},${Math.floor(g * 255)},${Math.floor(b * 255)},${alpha})`;
+        ctx.fillText(glyph, (col + 0.5) * cell, (row + 0.5) * cell);
+      }
+    }
+  }
+
+  function syncGridBackground() {
+    if (!isSvgRender) return;
+    const tile = Math.max(6, config.PIXEL_SIZE);
+    document.body.style.backgroundSize = `${tile}px ${tile}px`;
+  }
+
+  function getGridLayout() {
+    const styles = getComputedStyle(document.body);
+    const sizeParts = styles.backgroundSize.split(/\s+/);
+    const tileCss = Math.max(
+      6,
+      parseFloat(sizeParts[0]) || config.PIXEL_SIZE || 12,
+    );
+    const cell = tileCss * dpr;
+    const posParts = styles.backgroundPosition.split(/\s+/);
+    const parsePos = (token, container) => {
+      if (!token) return 0;
+      if (token.endsWith("%")) {
+        return ((parseFloat(token) || 0) / 100) * (container - tileCss) * dpr;
+      }
+      return (parseFloat(token) || 0) * dpr;
+    };
+
+    return {
+      tileCss,
+      cell,
+      originX: parsePos(posParts[0], viewportWidthCss),
+      originY: parsePos(posParts[1] || posParts[0], viewportHeightCss),
+      scale: cell / 51,
+    };
+  }
+
+  function renderSvgDye() {
+    const { cell, originX, originY, scale } = getGridLayout();
+    const startCol = Math.floor(-originX / cell) - 1;
+    const startRow = Math.floor(-originY / cell) - 1;
+    const endCol = Math.ceil((width - originX) / cell) + 1;
+    const endRow = Math.ceil((height - originY) / cell) + 1;
+    const cols = Math.max(1, endCol - startCol);
+    const rows = Math.max(1, endRow - startRow);
+
+    ctx.clearRect(0, 0, width, height);
+    ctx.lineCap = "butt";
+    ctx.lineJoin = "miter";
+    ctx.lineWidth = Math.max(1, scale);
+
+    for (let row = startRow; row < endRow; row++) {
+      for (let col = startCol; col < endCol; col++) {
+        const u = (col - startCol + 0.5) / cols;
+        const v = (row - startRow + 0.5) / rows;
+        const sx = Math.floor(clamp(u, 0, 1) * (simW - 1));
+        const sy = Math.floor(clamp(v, 0, 1) * (simH - 1));
+        const { r, g, b, alpha } = sampleCellColor(idx(sx, sy));
+        if (alpha < 0.04) continue;
+
+        const tileX = originX + col * cell;
+        const tileY = originY + row * cell;
+        ctx.strokeStyle = `rgba(${Math.floor(r * 255)},${Math.floor(g * 255)},${Math.floor(b * 255)},${alpha})`;
+        ctx.beginPath();
+        ctx.moveTo(tileX + 4.18933 * scale, tileY);
+        ctx.lineTo(tileX + 4.18933 * scale, tileY + 8.124 * scale);
+        ctx.moveTo(tileX, tileY + 3.93469 * scale);
+        ctx.lineTo(tileX + 8.1989 * scale, tileY + 3.93469 * scale);
+        ctx.stroke();
+      }
+    }
+  }
+
+  function renderDye() {
+    if (isAsciiRender) {
+      renderAsciiDye();
+      return;
+    }
+    if (isSvgRender) {
+      renderSvgDye();
+      return;
+    }
+    renderPixelDye();
+  }
+
   function frame(now) {
     if (lastTime === 0) lastTime = now;
     const dt = clamp((now - lastTime) * 0.001, 0.001, 0.018);
@@ -759,6 +951,7 @@ function initPixelFluidCursor() {
     [dyeR, dyeR0] = [dyeR0, dyeR];
     [dyeG, dyeG0] = [dyeG0, dyeG];
     [dyeB, dyeB0] = [dyeB0, dyeB];
+    updateDyeDebug();
     renderDye();
 
     requestAnimationFrame(frame);
@@ -801,6 +994,7 @@ function initPixelFluidCursor() {
   resize();
   setupMobileScrollLock();
   applyTheme();
+  syncGridBackground();
   setupPane();
   lightSchemeQuery.addEventListener("change", syncColorScheme);
   requestAnimationFrame(frame);

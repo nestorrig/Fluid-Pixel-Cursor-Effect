@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="icon" type="image/png" href="./img/favicon/favicon-96x96.png" sizes="96x96" />
+  <link rel="icon" type="image/svg+xml" href="./img/favicon/favicon.svg" />
+  <link rel="shortcut icon" href="./img/favicon/favicon.ico" />
+  <link rel="apple-touch-icon" sizes="180x180" href="./img/favicon/apple-touch-icon.png" />
+  <meta name="apple-mobile-web-app-title" content="Fluid Pixel Cursor" />
+  <link rel="manifest" href="./img/favicon/site.webmanifest" />
+  <title>Fluid Pixel Cursor</title>
+
+  <!-- Primary Meta Tags -->
+  <meta name="title" content="Fluid Pixel Cursor" />
+  <meta name="description"
+    content="Real-time 2D fluid pixel simulation driven by cursor and touch. Built with HTML, CSS, and vanilla JavaScript on the Canvas 2D API." />
+  <meta name="language" content="en" />
+  <meta name="robots" content="index, follow" />
+  <meta name="author" content="Nestor Rios Garcia, nestorrigs@gmail.com">
+
+  <!-- Open Graph / Facebook -->
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="https://nestorrig.github.io/Fluid-Pixel-Cursor-Effect/" />
+  <meta property="og:title" content="Fluid Pixel Cursor" />
+  <meta property="og:description"
+    content="Real-time 2D fluid pixel simulation driven by cursor and touch. Built with HTML, CSS, and vanilla JavaScript on the Canvas 2D API." />
+  <meta property="og:image"
+    content="https://nestorrig.github.io/Fluid-Pixel-Cursor-Effect/img/cover/cover_fluid-pixel-cursor.png" />
+  <meta property="og:image:width" content="1200" />
+  <meta property="og:image:height" content="630" />
+  <meta property="og:image:alt" content="Fluid Pixel Cursor cover image" />
+  <meta property="og:locale" content="en" />
+  <meta property="og:site_name" content="Fluid Pixel Cursor" />
+
+  <!-- Twitter -->
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:url" content="https://nestorrig.github.io/Fluid-Pixel-Cursor-Effect/" />
+  <meta name="twitter:title" content="Fluid Pixel Cursor" />
+  <meta name="twitter:description"
+    content="Real-time 2D fluid pixel simulation driven by cursor and touch. Built with HTML, CSS, and vanilla JavaScript on the Canvas 2D API." />
+  <meta name="twitter:image"
+    content="https://nestorrig.github.io/Fluid-Pixel-Cursor-Effect/img/cover/cover_fluid-pixel-cursor.png" />
+  <meta name="twitter:image:alt" content="Fluid Pixel Cursor cover image" />
+
+  <link rel="stylesheet" href="css/style.css">
+</head>
+
+<body>
+  <main class="main">
+    <div class="hero">
+      <h1 class="hero__title">Fluid Pixel Cursor</h1>
+    </div>
+
+    <footer class="footer">
+      <div class="social">
+        <p>Made by @nestorrig</p>
+        <div class="socials-list">
+          <a href="https://www.instagram.com/nestorrig/" target="_blank" title="Instagram">
+            <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 12 12">
+              <path d="M0 0h12v12H0z" fill="none" />
+              <path fill="currentColor"
+                d="M1 2H0v9h1Zm0 0h9V1H1Zm0 10h9v-1H1Zm2-4h1V5H3Zm1 1h3V8H4Zm0-4h3V4H4Zm3 3h1V5H7Zm3 3h1V2h-1ZM8 4h1V3H8Zm0 0" />
+            </svg>
+          </a>
+          <a href="https://www.linkedin.com/in/nestorrig/" target="_blank" title="LinkedIn">
+            <svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 24 24">
+              <path d="M0 0h24v24H0z" fill="none" />
+              <path fill="currentColor"
+                d="M7 22H1V8h6zm12-12h-8v10h2v-8h4v2h-2v8H9V8h10zm4 12h-6v-8h2v6h2v-8h2zM3 20h2V10H3zm18-8h-2v-2h2zM5 7H3V5h2zM3 5H1V3h2zm4 0H5V3h2zM5 3H3V1h2z" />
+            </svg>
+
+          </a>
+          <a href="https://www.x.com/nestorrig/" target="_blank" title="Twitter">
+            <svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 12 12">
+              <path d="M0 0h12v12H0z" fill="none" />
+              <path fill="currentColor"
+                d="M1 3h1V2h2V1H0v1h1Zm-1 9h1v-1H0Zm1-1h1v-1H1Zm1-1h1V9H2Zm1-1h1V8H3Zm3 2h1V9H6ZM5 9h1V8H5ZM4 8h1V6H4ZM3 6h1V5H3Zm4 6h4v-1h-1v-1H9v1H7ZM2 5h1V3H2Zm6 5h1V8H8ZM7 8h1V7H7ZM6 7h1V5H6ZM5 5h1V4H5ZM4 4h1V2H4Zm3 1h1V4H7Zm1-1h1V3H8Zm1-1h1V2H9Zm1-1h1V1h-1Zm0 0" />
+            </svg>
+
+          </a>
+          <a href="https://www.github.com/nestorrig/" target="_blank" title="GitHub">
+            <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 12 12">
+              <path d="M0 0h12v12H0z" fill="none" />
+              <path fill="currentColor"
+                d="M2 12h2v-1H3v-1H2V9H1V8h1v1h1v1h1V9h1V8H3V7H2V4h1V2h1v1h3V2h1v2h1v3H8v1H6v1h1v3h2v-1h1v-1h1V3h-1V2H9V1H2v1H1v1H0v7h1v1h1Zm0 0" />
+            </svg>
+
+          </a>
+          <a href="https://www.behance.net/nestorrig/" target="_blank" title="Behance">
+            <svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 23 23">
+              <path d="M0 0h24v24H0z" fill="none" />
+              <path fill="currentColor"
+                d="M22 11v-1h-1V9h-6v1h-1v1h-1v6h1v1h1v1h6v-1h1v-1h1v-1h-3v1h-3v-1h-1v-1h7v-4Zm-6 2v-2h4v2Zm-1-7h6v2h-6zm-4 7v-1h-1v-2h1V7h-1V6H9V5H1v14h9v-1h1v-1h1v-4ZM4 7h3v1h1v2H7v1H4Zm5 9H8v1H4v-4h4v1h1Z" />
+            </svg>
+
+          </a>
+
+        </div>
+      </div>
+
+      <div class="code">
+        <a href="https://github.com/nestorrig/Fluid-Pixel-Cursor-Effect" target="_blank" title="Code source">
+          <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 12 12">
+            <path d="M0 0h12v12H0z" fill="none" />
+            <path fill="currentColor"
+              d="M6 5H5v3h1Zm0 0h1V2H6ZM0 7h1V6H0Zm1 1h1V7H1Zm1 1h1V8H2Zm2 2h1V8H4ZM1 6h1V5H1Zm1-1h1V4H2Zm6 4h1V8H8Zm1-1h1V7H9Zm0-2h1V5H9Zm1 1h1V6h-1ZM8 5h1V4H8Zm0 0" />
+          </svg>
+
+        </a>
+        <p>Code source</p>
+      </div>
+    </footer>
+
+
+  </main>
+
+  <script src="js/script.js" type="module"></script>
+</body>
+
+</html>
